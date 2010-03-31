@@ -1,0 +1,5 @@
+Sesh requires the following:
+
+Redis: http://code.google.com/p/redis/
+Rediska: http://rediska.geometria-lab.net/
+Zend_Session_Namespace (or more of the Zend Framework): http://framework.zend.com/
