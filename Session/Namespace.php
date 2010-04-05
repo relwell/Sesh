@@ -31,7 +31,7 @@ class Sesh_Session_Namespace
     
     function __get($key)
     {
-        $attr = $this->transform($key);
+        $attr = $this->transform($key, true);
         return $this->_namespace->{$attr};
     }
     
@@ -49,8 +49,8 @@ class Sesh_Session_Namespace
     
     function hasKey($key)
     {
-        $attr = $this->transform($key);
-        return ($this->_namespace->{$attr} !== null);        
+        $attr = $this->transform($key, true);
+        return (($attr != null) && ($this->_namespace->{$attr} !== null));        
     }
     
     /**
@@ -62,13 +62,22 @@ class Sesh_Session_Namespace
      * @return string a single ascii character
      */
     
-    function transform($varname)
+    function transform($varname, $get=false)
     {
         $rediska = Rediska::getDefaultInstance();
         
-        if ($val = $rediska->get("sesh_namespace_{$this->_name}_{$varname}")) {
+        $val = $rediska->get("sesh_namespace_{$this->_name}_{$varname}");
+        
+        if ($val || ($get == true)) {
             return $val;
         } else {
+            while ($rediska->get('sesh_locked') == 1) {
+                // wait 1/20th of a second until we check again
+                time_nanosleep(0, 50000000);
+            }
+            
+            $rediska->set('sesh_locked', 1);
+            
             $charInt = $rediska->get("sesh_namespacechrs_{$this->_name}");
             if ($charInt > 0){
                 if ($charInt == 256){
@@ -83,6 +92,9 @@ class Sesh_Session_Namespace
                 $rediska->set("sesh_namespace_{$this->_name}_{$varname}", $char);
                 $rediska->set("sesh_namespacechrs_{$this->_name}", 2);
             }
+            
+            $rediska->set('sesh_locked', 0);
+            
             return $char;
         }
     }
@@ -94,6 +106,13 @@ class Sesh_Session_Namespace
         if ($val = $rediska->get("sesh_namespace_{$name}")) {
             return $val;
         } else {
+            while ($rediska->get('sesh_locked') == 1) {
+                // wait 1/20th of a second until we check again
+                time_nanosleep(0, 50000000);
+            }
+            
+            $rediska->set('sesh_locked', 1);
+            
             $charInt = $rediska->get("sesh_namespacechrs");
             if ($charInt > 0){
                 if ($charInt == 256){
@@ -108,6 +127,9 @@ class Sesh_Session_Namespace
                 $rediska->set("sesh_namespace_{$name}", $char);
                 $rediska->set("sesh_namespacechrs", 2);
             }
+            
+            $rediska->set('sesh_locked', 0);
+            
             return $char;
         }
     }
