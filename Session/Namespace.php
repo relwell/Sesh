@@ -4,7 +4,7 @@
  * 
  * Sesh: A memory-saving wrapper to Zend_Session_Namespace
  * 
- * Sesj uses the PHP Redis client Rediska to turn session 
+ * Sesh uses the PHP Redis client Rediska to turn session 
  * variable naems into single-character ASCII-extended hashes. 
  * Each namespace therefore has 255 available attributes per session.
  * You can now now name session variables as verbosely as you'd like without 
